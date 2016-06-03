@@ -1,0 +1,100 @@
+# -*- coding: utf-8 -*-
+"""Standard generic HLA-MA Snakfile"""
+
+from hlama import snake
+
+schema = snake.build_schema('data.json')
+
+shell.prefix('set -e -o pipefail; ')
+
+localrules: all
+
+# TODO: yara multi-threading
+
+rule all:
+    input: 'report.txt'
+
+rule make_report:
+    output: 'report.txt'
+    input: list(schema.get_report_input())
+    run:
+        schema.check_consistency(output[0])
+
+# Extensions of YARA indices
+YARA_EXTS = (
+    '', '.lf.drp', '.lf.drs', '.lf.drv', '.lf.pst',
+    '.rid.concat', '.rid.limits', '.sa.ind', '.sa.len',
+    '.sa.val', '.txt.concat', '.txt.limits', '.txt.size')
+
+rule yara_index_dna:
+    params:
+        hla_ref=schema.get_hla_ref(),
+    output:
+        expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
+    shell:
+        r"""
+        # TODO: proper handling of modules vs. custom installation
+        module load yara/0.9.4-foss-2015a
+        cp {params.hla_ref} {output[0]}
+
+        yara_indexer \
+            -o {output[0]} \
+            {output[0]}
+        """
+
+rule call_hla:
+    input:
+        expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
+    output:
+        hla_types='{sample}.d/hla_types.txt'
+    run:
+        first_reads = ' '.join(schema.get_first_read_paths(wildcards))
+        second_reads = ' '.join(schema.get_second_read_paths(wildcards))
+
+        shell(r"""
+        # TODO: proper handling of modules vs. custom installation
+        module purge  # possibly get rid of Python 3
+        module load yara/0.9.4-foss-2015a
+        module load pysam/0.8.3-foss-2015a-Python-2.7.9
+        module load OptiType/v1.1-cubi20151125-foss-2015a-Python-2.7.9
+
+        # Setup temporary directory for prefiltered reads and Optitype
+        # to work in.  Use trap for automatic cleanup.
+        export TMPDIR=$(mktemp -d)
+        trap "rm -rf $TMPDIR" EXIT KILL TERM INT HUP
+
+        # Helper function for pre-filtering reads using Yara
+        map()
+        {{
+            yara_mapper -e 4 {input[0]} $1 \
+            | samtools view -Sb -F 4 \
+            | samtools bam2fq - \
+            >> $2
+        }}
+
+        # Pre-filter left reads
+        for reads in {first_reads}; do
+            map $reads $TMPDIR/reads_1.fq
+        done
+
+        # Pre-filter right reads
+        for reads in {second_reads}; do
+            map $reads $TMPDIR/reads_2.fq
+        done
+        test -s $TMPDIR/reads_2.fq || rm -f $TMPDIR/reads_2.fq
+
+        # Perform calling with optitype
+        optitype --input $TMPDIR/reads_?.fq --dna -o $TMPDIR/out.tmp
+
+        # Move out results
+        prefix=$(basename $(ls $TMPDIR/out.tmp | head -n 1))
+        mv $TMPDIR/out.tmp/$prefix/${{prefix}}_coverage_plot.pdf \
+            {wildcards.sample}.d/coverage_plot.pdf
+        mv $TMPDIR/out.tmp/$prefix/${{prefix}}_result.tsv \
+            {wildcards.sample}.d/result.tsv
+        tail -n +2 {wildcards.sample}.d/result.tsv \
+        | cut -f 2-7 \
+        | tr '\t' '\n' \
+        | sort -V \
+        > {wildcards.sample}.d/hla_types.txt
+        """)

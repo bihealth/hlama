@@ -19,6 +19,9 @@ setup(
             'hlama = hlama.app:main',
         ],
     },
+    install-requires=[
+        'snakemake>=3.7.1',
+    ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
@@ -27,5 +30,6 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Bio-Informatics'
-    ]
+    ],
+    zip_safe=False,
 )
