@@ -22,6 +22,9 @@ setup(
     install_requires=[
         'snakemake>=3.7.1',
     ],
+    package_data={
+        '': ['Snakefile', '*.ini'],
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
