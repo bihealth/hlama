@@ -7,14 +7,77 @@ Given a list of matches tumor/normal samples or a list of pedigree files with sa
 
 ## For the impatient
 
-### Installation
+### Install preprequisites
 
-- Install YARA
-- Install RazerS3
-- Install OptiType
+Note that OptiType is a Python 2 program while HLA-MA is a Python 3 program.
+We recommend installing the dependencies OptiType, Yara, and RazerS3 using Bioconda.
+You can skip this step if you have already installed the prerequisites and placed them in your `$PATH`.
+
+The following commands will install Miniconda2 (for Python 2) in `~/miniconda2`.
 
 ```
-# pip install hlama
+# wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+# bash Miniconda2-latest-Linux-x86_64.sh -b -p ~/miniconda2
+```
+
+The following commands will create the appropriate conda environment for HLA-MA v0.1:
+
+```
+# conda create -y -n hlama-0.1 yara=0.9.6 razers3=3.5.0 optitype=2015.10.20
+```
+
+### Installing HLA-MA
+
+The following assumes that you are using virtualenv for your Python 3 environment.
+
+```
+# git clone git@github.com:bihealth/hlama.git
+# cd hlama
+# virtualenv -p python3 .venv
+# . .venv/bin/activate
+# python setup.py install
+```
+
+Now you have a working `hlama` installation in your `$PATH`.
+
+```
+# hlama --help
+```
+
+Create a configuration file with dependencies installed in Bioconda.
+If you have your dependencies installed in your $PATH then you can skip this step.
+
+```
+cat <<"EOF" >~/.hlama.cfg
+[hlama]
+# Allowed values for dep_source are
+#
+# - in_path (all binaries in $PATH, no further configuration
+#   is required)
+# - bioconda installed (using Bioconda (Python 2 for Optitype) see below)
+# - environment_modules (available using environment modules see below)
+dep_source = bioconda
+
+# If hlama.dependencies is "bioconda" then this section is used for
+# further configuration of the Bioconda setup.
+[hlama.bioconda]
+# Optional, value to prepend to $PATH for activating conda installation
+prepend_path = ~/bioconda2/bin
+# Name of the Conda environment to use.
+env = hlama-0.1
+
+# If hlama.dependencies is "environment_modules] then this section is
+# used for further configuration in the Environment Modules setup.
+[hlama.environment_modules]
+# Lines to prepend to running the optitype command.  Note that you can use
+# multi-line strings as long as the lines starting from the second line are
+# indented.
+module_command = # load modules
+    module purge  # get rid of possible Python 3 module
+    module load yara/0.9.4
+    module load razers3/3.5.0
+    module load optitype/2015.10.20
+EOF
 ```
 
 ### Checking matched tumor/normal samples

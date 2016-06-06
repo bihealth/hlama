@@ -3,18 +3,47 @@
 
 import fnmatch
 import json
+import os
 import sys
 
 from .base import HLAType
 from .pedigree import Pedigree, PedigreeMember, check_consistency, \
     check_identity
 from .app import PATTERNS_R1, PATTERNS_R2
+from . import config
+
+from hlama import __version__
 
 
 class HlamaSchema:
 
     def __init__(self, data):
         self.data = data
+        if self.data['version'] != __version__:
+            raise Exception(('Incompatible data.json version, hlama '
+                             'has version {}').format(__version__))
+        self.load_config()
+
+    def load_config(self):
+        config_path = self.data['config']
+        if config_path:
+            if not os.path.exists(config_path):
+                print('No configuration file at {}'.format(config_path),
+                      file=sys.stderr)
+                return 1
+            self.conf = config.Configuration.load(config_path)
+        elif os.path.exists(os.path.expanduser('~/.hlama.cfg')):
+            self.conf = config.Configuration.load(
+                os.path.expanduser('~/.hlama.cfg'))
+        else:
+            self.conf = config.Configuration.load(os.path.join(
+                os.path.dirname(__file__), 'default_config.ini'))
+
+    def command_prefix(self):
+        return self.conf.cmd_prefix()
+
+    def optitype_ini(self):
+        return os.path.join(os.path.dirname(__file__), 'optitype.ini')
 
     def get_report_input(self):
         result = []

@@ -9,6 +9,7 @@ import sys
 import textwrap
 
 from . import pedigree
+from hlama import __version__
 
 import snakemake
 
@@ -68,7 +69,7 @@ class BaseApp:
         if self.args.perform_checks:
             self.check_info(self.info)
         # Create Snakefile
-        with open(os.path.join(self.args.output_dir, 'data.json'), 'wt') as f:
+        with open(os.path.join(self.args.work_dir, 'data.json'), 'wt') as f:
             self.create_data_json(f, self.info)
         self.create_snakefile_link()
         # Stop here if we are not to run Snakemake or run it and display
@@ -79,23 +80,23 @@ class BaseApp:
             self.dont_run_snakemake()
 
     def create_snakefile_link(self):
-        if not os.path.exists(os.path.join(self.args.output_dir, 'Snakefile')):
+        if not os.path.exists(os.path.join(self.args.work_dir, 'Snakefile')):
             os.symlink(os.path.join(os.path.dirname(__file__), 'Snakefile'),
-                       os.path.join(self.args.output_dir, 'Snakefile'))
+                       os.path.join(self.args.work_dir, 'Snakefile'))
 
     def run_snakemake(self):
         """Run Snakemake and display result files afterwards"""
         print('\nRunning Snakemake\n=================\n', file=sys.stderr)
         snakemake.snakemake(
-            snakefile=os.path.join(self.args.output_dir, 'Snakefile'),
-            workdir=self.args.output_dir,
+            snakefile=os.path.join(self.args.work_dir, 'Snakefile'),
+            workdir=self.args.work_dir,
         )
         # TODO: check Snakemake result
 
         print('\nThe End\n=======\n', file=sys.stderr)
         print('\n'.join(textwrap.wrap(textwrap.dedent(r"""
             You can find the results in the "{}/report.txt" file.
-            """).format(self.args.output_dir).lstrip())), file=sys.stderr)
+            """).format(self.args.work_dir).lstrip())), file=sys.stderr)
 
     def dont_run_snakemake(self):
         """Don't run Snakemake and only display what to do afterwards"""
@@ -108,17 +109,17 @@ class BaseApp:
 
             After running Snakemake, you will find the results in the
             "report.txt" file.
-            """.format(self.args.output_dir)).lstrip(), 78)), file=sys.stderr)
+            """.format(self.args.work_dir)).lstrip(), 78)), file=sys.stderr)
 
     def create_out_dir(self):
         """Create output directory if it does not exist"""
-        if not os.path.exists(self.args.output_dir):
-            print('Creating {}...'.format(self.args.output_dir),
+        if not os.path.exists(self.args.work_dir):
+            print('Creating {}...'.format(self.args.work_dir),
                   file=sys.stderr)
-            os.makedirs(self.args.output_dir, exist_ok=True)
+            os.makedirs(self.args.work_dir, exist_ok=True)
         else:
             print('Output directory {} already exists.'.format(
-                self.args.output_dir), file=sys.stderr)
+                self.args.work_dir), file=sys.stderr)
 
     def load_info(self):
         """Load pedigree/matched sample file"""
@@ -230,6 +231,8 @@ class PedigreeApp(BaseApp):
                 'files': list(map(self.locate_file, paths)),
                 'mode': self.get_mode(paths),
             }
+        result['config'] = self.args.config
+        result['version'] = __version__
         json.dump(result, file, sort_keys = True, indent=4)
 
 
@@ -261,10 +264,13 @@ def main(argv=None):
                        help=('Path to pedigree file, starts pedigree '
                              'mode'))
 
-    parser.add_argument('--output-dir', type=str, default='hlama_out',
-                        help=('Directory to write HLA calls to.  Will be '
-                              'created if it does not exist.  Default: '
-                              '"hlama_out"'))
+    parser.add_argument('--config', type=str,
+                        help=('Optional explicit path to configuration '
+                              'file, by default ~/.hlama.cfg is searched '
+                              'for'))
+
+    parser.add_argument('--work-dir', type=str, default='hlama_work',
+                        help='Directory to create the Snakefile in')
     parser.add_argument('--reads-base-dir', type=str, action='append',
                         dest='reads_base_dirs', default=[],
                         help=('Base directory for reads, give multiple '

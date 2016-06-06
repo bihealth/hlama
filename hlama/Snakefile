@@ -43,6 +43,9 @@ rule yara_index_dna:
         """
 
 rule call_hla:
+    params:
+        cmd_prefix=schema.command_prefix(),
+        optitype_ini=schema.optitype_ini(),
     input:
         expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
     output:
@@ -52,11 +55,9 @@ rule call_hla:
         second_reads = ' '.join(schema.get_second_read_paths(wildcards))
 
         shell(r"""
-        # TODO: proper handling of modules vs. custom installation
-        module purge  # possibly get rid of Python 3
-        module load yara/0.9.4-foss-2015a
-        module load pysam/0.8.3-foss-2015a-Python-2.7.9
-        module load OptiType/v1.1-cubi20151125-foss-2015a-Python-2.7.9
+        set -e -o pipefail
+
+        {params.cmd_prefix}
 
         # Setup temporary directory for prefiltered reads and Optitype
         # to work in.  Use trap for automatic cleanup.
@@ -84,7 +85,11 @@ rule call_hla:
         test -s $TMPDIR/reads_2.fq || rm -f $TMPDIR/reads_2.fq
 
         # Perform calling with optitype
-        optitype --input $TMPDIR/reads_?.fq --dna -o $TMPDIR/out.tmp
+        OptiTypePipeline.py \
+            --config {params.optitype_ini} \
+            --input $TMPDIR/reads_?.fq \
+            --dna \
+            -o $TMPDIR/out.tmp
 
         # Move out results
         prefix=$(basename $(ls $TMPDIR/out.tmp | head -n 1))
