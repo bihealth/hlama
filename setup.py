@@ -19,7 +19,7 @@ setup(
             'hlama = hlama.app:main',
         ],
     },
-    install-requires=[
+    install_requires=[
         'snakemake>=3.7.1',
     ],
     classifiers=[
