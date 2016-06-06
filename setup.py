@@ -23,7 +23,7 @@ setup(
         'snakemake>=3.7.1',
     ],
     package_data={
-        '': ['Snakefile', '*.ini'],
+        '': ['Snakefile', '*.ini', '*.fasta.gz'],
     },
     classifiers=[
         'Development Status :: 3 - Alpha',

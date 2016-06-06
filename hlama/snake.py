@@ -52,10 +52,8 @@ class HlamaSchema:
             yield tpl.format(member['name'])
 
     def get_hla_ref(self):
-        return ('/cubit/ubuntu14.04/tools/easybuild/software/'
-                'OptiType/v1.1-cubi20151125-foss-2015a-Python-2.7.9/'
-                'lib/python2.7/site-packages/optitype/data/'
-                'hla_reference_dna.fasta')
+        return os.path.join(os.path.dirname(__file__),
+                            'hla_reference_dna.fasta.gz')
 
     def get_first_read_paths(self, wildcards):
         member = self.data['members'][wildcards.sample]

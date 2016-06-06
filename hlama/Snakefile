@@ -5,6 +5,7 @@ from hlama import snake
 
 schema = snake.build_schema('data.json')
 
+shell.executable('/bin/bash')
 shell.prefix('set -e -o pipefail; ')
 
 localrules: all
@@ -28,14 +29,15 @@ YARA_EXTS = (
 
 rule yara_index_dna:
     params:
+        cmd_prefix=schema.command_prefix(),
         hla_ref=schema.get_hla_ref(),
     output:
         expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
     shell:
         r"""
-        # TODO: proper handling of modules vs. custom installation
-        module load yara/0.9.4-foss-2015a
-        cp {params.hla_ref} {output[0]}
+        {params.cmd_prefix}
+
+        zcat {params.hla_ref} >{output[0]}
 
         yara_indexer \
             -o {output[0]} \
@@ -55,8 +57,6 @@ rule call_hla:
         second_reads = ' '.join(schema.get_second_read_paths(wildcards))
 
         shell(r"""
-        set -e -o pipefail
-
         {params.cmd_prefix}
 
         # Setup temporary directory for prefiltered reads and Optitype
