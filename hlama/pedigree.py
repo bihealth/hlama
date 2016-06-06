@@ -102,6 +102,20 @@ def check_consistency(precision, index_calls, father_calls, mother_calls):
     return mismatches
 
 
+def check_identity(precision, lhs_calls, rhs_calls):
+    """Check for identity up to the given precision"""
+
+    def to_str(hla):
+        return hla.prec_str(precision)
+
+    for gene in 'ABC':
+        lhs_set = set(map(to_str, lhs_calls[gene]))
+        rhs_set = set(map(to_str, rhs_calls[gene]))
+        if lhs_set != rhs_set:
+            return False
+    return True
+
+
 def run(args):
     """Run the consistency check"""
     # Load the pedigree file

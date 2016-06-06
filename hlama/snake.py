@@ -6,7 +6,8 @@ import json
 import sys
 
 from .base import HLAType
-from .pedigree import Pedigree, PedigreeMember, check_consistency
+from .pedigree import Pedigree, PedigreeMember, check_consistency, \
+    check_identity
 from .app import PATTERNS_R1, PATTERNS_R2
 
 
@@ -82,16 +83,27 @@ class HlamaSchema:
                 index_member = pedigree.by_name[index]
                 father = index_member.father
                 mother = index_member.mother
+                # check for identity to any parent, flag warning
+                flags = []
+                for digits in (2, 4):
+                    if check_identity(digits, calls[index],
+                                      calls.get(father)):
+                        flags.append('WARN:identity-father:{}'.format(digits))
+                    if check_identity(digits, calls[index],
+                                      calls.get(mother)):
+                        flags.append('WARN:identity-mother:{}'.format(digits))
                 # check for 4 digit consistency
                 mm4 = check_consistency(4, calls[index], calls.get(father),
                                         calls.get(mother))
                 # check for 2 digit consistency
                 mm2 = check_consistency(2, calls[index], calls.get(father),
                                         calls.get(mother))
+                # get count of present parents
                 num_parents = len({father, mother} - {'0'})
                 # print result line
                 print('\t'.join(map(str, [
-                    index, num_parents, mm2 or 'OK', mm4 or 'OK'
+                    index, num_parents, mm2 or 'OK', mm4 or 'OK',
+                    ','.join(flags) or 'OK'
                 ])), file=f)
 
 
