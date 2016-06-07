@@ -20,6 +20,14 @@ The following commands will install Miniconda2 (for Python 2) in `~/miniconda2`.
 # bash Miniconda2-latest-Linux-x86_64.sh -b -p ~/miniconda2
 ```
 
+Activate Miniconda 2 installation by adding `bin` path, then add R and Bioconda channels.
+
+```
+# export PATH=~/miniconda2/bin:${PATH}
+# conda config --add channels r
+# conda config --add channels bioconda
+```
+
 The following commands will create the appropriate conda environment for HLA-MA v0.1:
 
 ```
