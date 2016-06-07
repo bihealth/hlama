@@ -36,13 +36,13 @@ class Configuration:
         """Return necessary command prefix"""
         if self.dep_source == 'bioconda':
             prepend = self.config.get('hlama.bioconda', 'prepend_path')
-            print(prepend)
             if prepend:
-                prepend = 'export PATH={prepend}:$PATH'.format(
+                prepend = 'export PATH={prepend}:$PATH; '.format(
                     prepend=prepend)
             env = self.config.get('hlama.bioconda', 'env')
             if env:
-                s = 'source activate {}'.format(env)
+                s = '{}source activate {}'.format(
+                prepend if prepend else '', env)
             else:
                 s = 'echo "Error: not configured" 1>&2; exit 1;'
             return '# Load conda environment\n{}\n{}'.format(
