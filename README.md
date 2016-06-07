@@ -125,7 +125,7 @@ The HLA loci are highly variable and are thus very useful as a genetic fingerpri
 There are three genes, HLA-A, HLA-B, HLA-C.
 Thus, a diploid human genome carries six HLA gene copies in total.
 Most HLA types found in the human population are known and are assigned a number, its HLA type, e.g., **HLA-A\*02:01**.
-The combinatio of the six hla types in a human genome is used as the fingerprint.
+The combination of the six hla types in a human genome is used as the fingerprint.
 
 **In matched tumor/normal samples** the HLA type should be the same, or in the case of somatic mutations in the HLA loci at least very similar.
 Thus, a strong mismatch in HLA types indicates problems with sample matching (e.g., sample swaps).
