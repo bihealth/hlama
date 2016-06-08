@@ -233,6 +233,7 @@ class PedigreeApp(BaseApp):
             }
         result['config'] = self.args.config
         result['version'] = __version__
+        result['num_threads'] = self.args.num_threads
         json.dump(result, file, sort_keys = True, indent=4)
 
 
@@ -284,6 +285,10 @@ def main(argv=None):
     parser.add_argument('--disable-checks', dest='perform_checks',
                         default=True, action='store_false',
                         help='Disable input checks')
+
+    parser.add_argument('--num-threads', default=1,
+                        help=('Number of threads to use for read mapping, '
+                              ' defaults to 8'))
 
     args = parser.parse_args(argv)
     return run(args)

@@ -15,6 +15,12 @@ localrules: all
 rule all:
     input: 'report.txt'
 
+onsuccess:
+    schema.cleanup()
+
+onerror:
+    schema.cleanup()
+
 rule make_report:
     output: 'report.txt'
     input: list(schema.get_report_input())
@@ -47,7 +53,8 @@ rule yara_index_dna:
 rule call_hla:
     params:
         cmd_prefix=schema.command_prefix(),
-        optitype_ini=schema.optitype_ini(),
+        optitype_ini=schema.optitype_ini_path,
+        yara_threads=schema.yara_threads(),
     input:
         expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
     output:
@@ -67,7 +74,7 @@ rule call_hla:
         # Helper function for pre-filtering reads using Yara
         map()
         {{
-            yara_mapper -e 4 {input[0]} $1 \
+            yara_mapper -t {params.yara_threads} -e 4 {input[0]} $1 \
             | samtools view -Sb -F 4 \
             | samtools bam2fq - \
             >> $2

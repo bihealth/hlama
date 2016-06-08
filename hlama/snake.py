@@ -5,6 +5,7 @@ import fnmatch
 import json
 import os
 import sys
+import tempfile
 
 from .base import HLAType
 from .pedigree import Pedigree, PedigreeMember, check_consistency, \
@@ -23,6 +24,11 @@ class HlamaSchema:
             raise Exception(('Incompatible data.json version, hlama '
                              'has version {}').format(__version__))
         self.load_config()
+        self.build_optitype_ini()
+
+    def yara_threads(self):
+        """Return number of threads to use for Yara"""
+        return self.data['num_threads']
 
     def load_config(self):
         config_path = self.data['config']
@@ -42,8 +48,19 @@ class HlamaSchema:
     def command_prefix(self):
         return self.conf.cmd_prefix()
 
-    def optitype_ini(self):
-        return os.path.join(os.path.dirname(__file__), 'optitype.ini')
+    def build_optitype_ini(self):
+        ini_in = os.path.join(os.path.dirname(__file__), 'optitype.ini')
+        with open(ini_in, 'rt') as f:
+            contents = f.read()
+        contents = contents.format(num_threads=self.data['num_threads'])
+        with tempfile.NamedTemporaryFile(
+                'wt', suffix='.ini', delete=False) as f:
+            f.write(contents)
+        self.optitype_ini_path = f.name
+
+    def cleanup(self):
+        """Remove tmemporary files"""
+        os.unlink(self.optitype_ini_path)
 
     def get_report_input(self):
         result = []
