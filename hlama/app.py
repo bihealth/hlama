@@ -9,6 +9,7 @@ import sys
 import textwrap
 
 from . import pedigree
+from . import matched_pairs
 from hlama import __version__
 
 import snakemake
@@ -31,11 +32,13 @@ PAIRED_END = 'paired-end'
 # Patterns for first read
 PATTERNS_R1 = [
     '*_1*.fastq.gz', '*_1*.fq.gz', '*_R1_*.fq.gz', '*_R1_*.fastq.gz',
+    '*_R1.fastq.gz',
     '*_1*.fastq', '*_1*.fq', '*_R1_*.fq', '*_R1_*.fastq',
 ]
 # Patterns for second read
 PATTERNS_R2 = [
     '*_2*.fastq.gz', '*_2*.fq.gz', '*_R2_*.fq.gz', '*_R2_*.fastq.gz',
+    '*_R2.fastq.gz',
     '*_2*.fastq', '*_2*.fq', '*_R2_*.fq', '*_R2_*.fastq',
 ]
 
@@ -183,6 +186,55 @@ class BaseApp:
 class SomaticApp(BaseApp):
     """Application for the case of matched somatic samples"""
 
+    def load_info(self):
+        """Load config tsv and return it"""
+        print('Loading tumor/normal pairs from {}...'.format(
+            self.args.tumor_normal.name), file=sys.stderr)
+        result = matched_pairs.Cohort.parse(self.args.tumor_normal)
+        print('>>> pairs <<<', file=sys.stderr)
+        result.print(sys.stderr)
+        print('>>> /pairs <<<', file=sys.stderr)
+        return result
+
+    def check_info(self, config):
+        """Check files for existence"""
+        for member in config.members:
+            paths = member.data[0].split(',')
+            if not paths:
+                tpl = 'Individual {} has no FASTQ files!'
+                raise InputDataException(tpl.format(member.name))
+            # Check that all files exist
+            resolved = []
+            for path in paths:
+                try:
+                    resolved.append(self.locate_file(path))
+                except InputDataException as e:
+                    tpl = 'Individual {} refers to non-existing path {}!'
+                    raise InputDataException(tpl.format(
+                        member.name, path))
+            # Determine single-end or paired-end mode
+            self.get_mode(resolved)
+
+    def create_data_json(self, file, config):
+        """Create ``data.json``"""
+        result = {'schema': 'hla_check_pairs', 'members': {}}
+        for member in config.members:
+            paths = member.data[0].split(',')
+            result['members'][member.name] = {
+                'donor': member.donor,
+                'sample': member.sample,
+                'name': member.sample,
+                #'seq_type': member.seq_type,
+                #'tumor_normal': member.tumor_normal,
+                'reference': member.reference_sample,
+                'files': list(map(self.locate_file, paths)),
+                'mode': self.get_mode(paths),
+            }
+        result['config'] = self.args.config
+        result['version'] = __version__
+        result['num_threads'] = self.args.num_threads
+        json.dump(result, file, sort_keys = True, indent=4)
+
 
 class PedigreeApp(BaseApp):
     """Application for the case of samples from a pedigree"""
@@ -286,7 +338,7 @@ def main(argv=None):
                         default=True, action='store_false',
                         help='Disable input checks')
 
-    parser.add_argument('--num-threads', default=1,
+    parser.add_argument('--num-threads', default=8,
                         help=('Number of threads to use for read mapping, '
                               ' defaults to 8'))
 

@@ -4,6 +4,7 @@
 from hlama import snake
 
 schema = snake.build_schema('data.json')
+schema_mode = schema.get_schema_type()
 
 shell.executable('/bin/bash')
 shell.prefix('set -e -o pipefail; ')
@@ -25,7 +26,7 @@ rule make_report:
     output: 'report.txt'
     input: list(schema.get_report_input())
     run:
-        schema.check_consistency(output[0])
+        schema.check_consistency(output[0], schema_mode)
 
 # Extensions of YARA indices
 YARA_EXTS = (
@@ -90,6 +91,14 @@ rule call_hla:
             map $reads $TMPDIR/reads_2.fq
         done
         test -s $TMPDIR/reads_2.fq || rm -f $TMPDIR/reads_2.fq
+
+        if [[ ! -s $TMPDIR/reads_1.fq ]]; then
+            echo "FATAL ERROR: No reads mapped to HLA genes"
+            echo "FATAL ERROR:"
+            echo "FATAL ERROR: Are you sure your enrichment/capture kit contains"
+            echo "FATAL ERROR: probes in the HLA regions?"
+            exit 1
+        fi
 
         # Perform calling with optitype
         OptiTypePipeline.py \

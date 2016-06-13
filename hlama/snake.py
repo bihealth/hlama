@@ -10,6 +10,8 @@ import tempfile
 from .base import HLAType
 from .pedigree import Pedigree, PedigreeMember, check_consistency, \
     check_identity
+from .matched_pairs import check_consistency as check_pair_consistency
+
 from .app import PATTERNS_R1, PATTERNS_R2
 from . import config
 
@@ -86,6 +88,9 @@ class HlamaSchema:
                 if fnmatch.fnmatch(path, pattern):
                     yield path
 
+    def get_schema_type(self):
+        return(self.data['schema'])
+
 
     def _build_pedigree(self):
         members = []
@@ -100,55 +105,92 @@ class HlamaSchema:
         return Pedigree(members)
 
     # TODO: refactor out of here, only applies to pedigree
-    def check_consistency(self, out_path):
-        pedigree = self._build_pedigree()
+    def check_consistency(self, out_path, mode):
+        if mode == "hla.pedigree":
+            pedigree = self._build_pedigree()
 
-        print('Loading HLA calls...', file=sys.stderr)
-        all_calls = {}
-        calls = {}
-        for member in pedigree.members:
-            donor = member.name
-            all_calls[donor] = []
-            calls[donor] = {'A': [], 'B': [], 'C': []}
-            with open('{}.d/hla_types.txt'.format(donor), 'rt') as fcalls:
-                for hla_type in sorted(HLAType.parse(line.strip())
-                                       for line in fcalls):
-                    calls[donor][hla_type.gene_name].append(hla_type)
-                    all_calls[donor].append(hla_type)
+            print('Loading HLA calls...', file=sys.stderr)
+            all_calls = {}
+            calls = {}
+            for member in pedigree.members:
+                donor = member.name
+                all_calls[donor] = []
+                calls[donor] = {'A': [], 'B': [], 'C': []}
+                with open('{}.d/hla_types.txt'.format(donor), 'rt') as fcalls:
+                    for hla_type in sorted(HLAType.parse(line.strip())
+                                           for line in fcalls):
+                        calls[donor][hla_type.gene_name].append(hla_type)
+                        all_calls[donor].append(hla_type)
 
-        print('Collecting index members...', file=sys.stderr)
-        index_members = [member.name for member in pedigree.members
-                         if member.father != '0' or member.mother != '0']
+            print('Collecting index members...', file=sys.stderr)
+            index_members = [member.name for member in pedigree.members
+                             if member.father != '0' or member.mother != '0']
 
-        print('Checking for consistency...', file=sys.stderr)
-        with open(out_path, 'wt') as f:
-            for index in index_members:
-                # get IDs of parents
-                index_member = pedigree.by_name[index]
-                father = index_member.father
-                mother = index_member.mother
-                # check for identity to any parent, flag warning
-                flags = []
-                for digits in (2, 4):
-                    if check_identity(digits, calls[index],
-                                      calls.get(father)):
-                        flags.append('WARN:identity-father:{}'.format(digits))
-                    if check_identity(digits, calls[index],
-                                      calls.get(mother)):
-                        flags.append('WARN:identity-mother:{}'.format(digits))
+            print('Checking for consistency...', file=sys.stderr)
+            with open(out_path, 'wt') as f:
+                for index in index_members:
+                    # get IDs of parents
+                    index_member = pedigree.by_name[index]
+                    father = index_member.father
+                    mother = index_member.mother
+                    # check for identity to any parent, flag warning
+                    flags = []
+                    for digits in (2, 4):
+                        if check_identity(digits, calls[index],
+                                          calls.get(father)):
+                            flags.append('WARN:identity-father:{}'.format(digits))
+                        if check_identity(digits, calls[index],
+                                          calls.get(mother)):
+                            flags.append('WARN:identity-mother:{}'.format(digits))
+                    # check for 4 digit consistency
+                    mm4 = check_consistency(4, calls[index], calls.get(father),
+                                            calls.get(mother))
+                    # check for 2 digit consistency
+                    mm2 = check_consistency(2, calls[index], calls.get(father),
+                                            calls.get(mother))
+                    # get count of present parents
+                    num_parents = len({father, mother} - {'0'})
+                    # print result line
+                    print('\t'.join(map(str, [
+                        index, num_parents, mm2 or 'OK', mm4 or 'OK',
+                        ','.join(flags) or 'OK'
+                    ])), file=f)
+        ######################################################################
+        elif mode == "hla_check_pairs":
+            print('Loading HLA calls...', file=sys.stderr)
+            for sample in self.data['members'].values():
+                sname = sample['sample']
+                if sample['sample'] == sample['reference']:
+                    continue
+                else:
+                    ftumor = sample['sample'] + ".d/hla_types.txt"
+                    fnormal = sample['reference'] + ".d/hla_types.txt"
+
+                print(sname, fnormal, ftumor, file=sys.stderr)
+                ncalls = {}
+                tcalls = {}
+
+                ncalls[sname] = []
+                with open(fnormal, 'rt') as calls:
+                    for hla_type in sorted(HLAType.parse(line.strip())
+                                           for line in calls):
+                        ncalls[sname].append(hla_type)
+
+                tcalls[sname] = []
+                with open(ftumor, 'rt') as calls:
+                    for hla_type in sorted(HLAType.parse(line.strip())
+                                           for line in calls):
+                        tcalls[sname].append(hla_type)
+                print('Checking for consistency...', file=sys.stderr)
                 # check for 4 digit consistency
-                mm4 = check_consistency(4, calls[index], calls.get(father),
-                                        calls.get(mother))
+                mm4 = check_pair_consistency(4, ncalls[sname], tcalls[sname])
                 # check for 2 digit consistency
-                mm2 = check_consistency(2, calls[index], calls.get(father),
-                                        calls.get(mother))
-                # get count of present parents
-                num_parents = len({father, mother} - {'0'})
+                mm2 = check_pair_consistency(2, ncalls[sname], tcalls[sname])
                 # print result line
-                print('\t'.join(map(str, [
-                    index, num_parents, mm2 or 'OK', mm4 or 'OK',
-                    ','.join(flags) or 'OK'
-                ])), file=f)
+                with open(out_path, 'wt') as f:
+                    print('\t'.join(map(str, [
+                        sname, mm2 or 'OK', mm4 or 'OK'
+                    ])), file=f)
 
 
 def build_schema(path):
