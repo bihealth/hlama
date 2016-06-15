@@ -187,7 +187,7 @@ class HlamaSchema:
                 # check for 2 digit consistency
                 mm2 = check_pair_consistency(2, ncalls[sname], tcalls[sname])
                 # print result line
-                with open(out_path, 'wt') as f:
+                with open(out_path, 'at') as f:
                     print('\t'.join(map(str, [
                         sname, mm2 or 'OK', mm4 or 'OK'
                     ])), file=f)
