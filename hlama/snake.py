@@ -114,7 +114,7 @@ class HlamaSchema:
 
     # TODO: refactor out of here, only applies to pedigree
     def check_consistency(self, out_path, mode):
-        if mode == "hla.pedigree":
+        if mode == "hla_pedigree":
             pedigree = self._build_pedigree()
 
             print('Loading HLA calls...', file=sys.stderr)
