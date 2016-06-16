@@ -124,13 +124,22 @@ rule call_hla:
             echo "FATAL ERROR: probes in the HLA regions?"
             exit 1
         fi
-
+        
         # Perform calling with optitype
-        OptiTypePipeline.py \
-            --config {params.optitype_ini} \
-            --input $TMPDIR/reads_?.fq \
-            --dna \
-            -o $TMPDIR/out.tmp
+        if [ {input[0]} = tmp/ref_rna.fasta ]
+        then
+            OptiTypePipeline.py \
+                --config {params.optitype_ini} \
+                --input $TMPDIR/reads_?.fq \
+                --rna \
+                -o $TMPDIR/out.tmp
+        else
+            OptiTypePipeline.py \
+                --config {params.optitype_ini} \
+                --input $TMPDIR/reads_?.fq \
+                --dna \
+                -o $TMPDIR/out.tmp
+        fi
 
         # Move out results
         prefix=$(basename $(ls $TMPDIR/out.tmp | head -n 1))
