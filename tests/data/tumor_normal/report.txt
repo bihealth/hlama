@@ -1,1 +1,3 @@
-donor1_tumor	1	1
+donor1_tumor	OK	OK
+donor1_tumor_rna	1	1
+donor2_tumor	OK	OK

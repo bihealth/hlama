@@ -34,8 +34,8 @@ def test_app(report, tsv_file, data_dir):
 
     with open(os.path.join(os.path.dirname(__file__), work_dir,
         'report.txt')) as f:
-        result = f.readline()
+        result = f.read().splitlines()
     with open(report, 'r') as f:
-        solution = f.readline()
+        solution = f.read().splitlines()
 
-    assert result == solution
+    assert set(result) == set(solution)
