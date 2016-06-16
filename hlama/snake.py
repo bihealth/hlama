@@ -70,9 +70,13 @@ class HlamaSchema:
             tpl = '{}.d/hla_types.txt'
             yield tpl.format(member['name'])
 
-    def get_hla_ref(self):
+    def get_hla_dna_ref(self):
         return os.path.join(os.path.dirname(__file__),
                             'hla_reference_dna.fasta.gz')
+
+    def get_hla_rna_ref(self):
+        return os.path.join(os.path.dirname(__file__),
+                            'hla_reference_rna.fasta.gz')
 
     def get_first_read_paths(self, wildcards):
         member = self.data['members'][wildcards.sample]
@@ -87,6 +91,10 @@ class HlamaSchema:
             for pattern in PATTERNS_R2:
                 if fnmatch.fnmatch(path, pattern):
                     yield path
+
+    def get_seq_type(self, wildcards):
+        member = self.data['members'][wildcards.sample]
+        return member.get('seq_type', 'DNA')
 
     def get_schema_type(self):
         return(self.data['schema'])

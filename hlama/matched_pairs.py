@@ -11,34 +11,37 @@ class Donor:
     @classmethod
     def parse_line(klass, line):
         arr = line.strip().split()
-        return Donor(*arr[0:3], data=arr[3:])
+        return Donor(*arr[0:4], data=arr[4:])
 
-    def __init__(self, donor, sample,
-                 reference_sample, data=[]):
+    def __init__(self, donor, sample, reference_sample,
+                 seq_type, data=[]):
         self.donor = donor
         self.sample = sample
         self.name = sample
         self.reference_sample = reference_sample
+        self.seq_type = seq_type
         self.data = list(data)
 
     def __str__(self):
         return 'Donor({})'.format(', '.join(map(str, [
             self.donor,
             self.sample,
-            self.reference_sample
+            self.reference_sample,
+            self.seq_type,
             ])))
 
     def print(self, file):
         print('\t'.join([
             self.donor,
             self.sample,
-            self.reference_sample
+            self.reference_sample,
+            self.seq_type,
             ]),
               file=file)
 
 
 class Cohort:
-    """Representation of a pedigree"""
+    """Representation of a cohort"""
 
     @classmethod
     def parse(klass, f):

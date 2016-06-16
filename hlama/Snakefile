@@ -37,7 +37,7 @@ YARA_EXTS = (
 rule yara_index_dna:
     params:
         cmd_prefix=schema.command_prefix(),
-        hla_ref=schema.get_hla_ref(),
+        hla_ref=schema.get_hla_dna_ref(),
     output:
         expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
     shell:
@@ -51,13 +51,38 @@ rule yara_index_dna:
             {output[0]}
         """
 
+rule yara_index_rna:
+    params:
+        cmd_prefix=schema.command_prefix(),
+        hla_ref=schema.get_hla_rna_ref(),
+    output:
+        expand('tmp/ref_rna.fasta{ext}', ext=YARA_EXTS)
+    shell:
+        r"""
+        {params.cmd_prefix}
+
+        zcat {params.hla_ref} >{output[0]}
+
+        yara_indexer \
+            -o {output[0]} \
+            {output[0]}
+        """
+
+def get_seq_specific_ref(wildcards):
+    "Input function for rule call_hla"
+    seq_type = schema.get_seq_type(wildcards)
+    if seq_type == "RNA":
+        return expand('tmp/ref_rna.fasta{ext}', ext=YARA_EXTS)
+    else:
+        return expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
+
 rule call_hla:
     params:
         cmd_prefix=schema.command_prefix(),
         optitype_ini=schema.optitype_ini_path,
         yara_threads=schema.yara_threads(),
     input:
-        expand('tmp/ref_dna.fasta{ext}', ext=YARA_EXTS)
+        get_seq_specific_ref
     output:
         hla_types='{sample}.d/hla_types.txt'
     run:
