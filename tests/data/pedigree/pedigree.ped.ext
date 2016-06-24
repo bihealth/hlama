@@ -1,0 +1,3 @@
+family1	daughter1	father1	mother1	2	2	daughter1_1.fq,daughter1_2.fq
+family1	father1	0	0	1	1	father1_1.fq,father1_2.fq
+family1	mother1	0	0	2	1	mother1_1.fq,mother1_2.fq

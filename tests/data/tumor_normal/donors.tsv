@@ -1,0 +1,6 @@
+donor1	donor1_normal	donor1_normal	DNA	donor1_normal_1.fq,donor1_normal_2.fq
+donor1	donor1_tumor	donor1_normal	DNA	donor1_tumor_1.fq,donor1_tumor_2.fq
+donor1	donor1_tumor_rna	donor1_normal	RNA	donor1_tumor_rna_1.fq,donor1_tumor_rna_2.fq
+donor2	donor2_normal	donor2_normal	DNA	donor2_normal_1.fq,donor2_normal_2.fq
+donor2	donor2_tumor	donor2_normal	DNA	donor2_tumor_1.fq,donor2_tumor_2.fq
+
