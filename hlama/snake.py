@@ -91,7 +91,6 @@ class HlamaSchema:
     def get_schema_type(self):
         return(self.data['schema'])
 
-
     def _build_pedigree(self):
         members = []
         for member in self.data['members'].values():
@@ -138,10 +137,12 @@ class HlamaSchema:
                     for digits in (2, 4):
                         if check_identity(digits, calls[index],
                                           calls.get(father)):
-                            flags.append('WARN:identity-father:{}'.format(digits))
+                            flags.append('WARN:identity-father:{}'.format(
+                                digits))
                         if check_identity(digits, calls[index],
                                           calls.get(mother)):
-                            flags.append('WARN:identity-mother:{}'.format(digits))
+                            flags.append('WARN:identity-mother:{}'.format(
+                                digits))
                     # check for 4 digit consistency
                     mm4 = check_consistency(4, calls[index], calls.get(father),
                                             calls.get(mother))

@@ -42,7 +42,7 @@ class Configuration:
             env = self.config.get('hlama.bioconda', 'env')
             if env:
                 s = '{}source activate {}'.format(
-                prepend if prepend else '', env)
+                    prepend if prepend else '', env)
             else:
                 s = 'echo "Error: not configured" 1>&2; exit 1;'
             return '# Load conda environment\n{}\n{}'.format(
