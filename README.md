@@ -1,6 +1,6 @@
 # HLA-MA
 
-<img align="right" width="171" height="200" src="https://raw.githubusercontent.com/bihealth/hlama/master/images/alpaca.png?token=AAf2NHKthW5G4gX1PY34OGhyaafRHSPRks5XWoJTwA%3D%3D">
+<img align="right" width="171" height="200" src="images/alpaca.png">
 
 HLA-MA allows for the matching of high-throughput sequencing (HTS) samples based on HLA typing.
 Given a list of matches tumor/normal samples or a list of pedigree files with samples, HLA-MA validates the matching information.
