@@ -159,7 +159,7 @@ class BaseApp:
         if seen[1] and seen[0] != seen[1]:
             raise InvalidDataException(
                 'Have seen different number of R1 and R2 reads in {}'.format(
-                ','.join(paths)))
+                    ','.join(paths)))
         return (PAIRED_END if seen[1] else SINGLE_END)
 
     def locate_file(self, path):
@@ -232,7 +232,7 @@ class SomaticApp(BaseApp):
         result['config'] = self.args.config
         result['version'] = __version__
         result['num_threads'] = self.args.num_threads
-        json.dump(result, file, sort_keys = True, indent=4)
+        json.dump(result, file, sort_keys=True, indent=4)
 
 
 class PedigreeApp(BaseApp):
@@ -285,7 +285,7 @@ class PedigreeApp(BaseApp):
         result['config'] = self.args.config
         result['version'] = __version__
         result['num_threads'] = self.args.num_threads
-        json.dump(result, file, sort_keys = True, indent=4)
+        json.dump(result, file, sort_keys=True, indent=4)
 
 
 def run(args):

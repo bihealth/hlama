@@ -11,7 +11,8 @@ setup(
     description='HLA-typing based HTS sample matching',
     license='MIT',
     author='Manuel Holtgrewe, Clemens Messerschmidt',
-    author_email='manuel.holtgrewe@bihealth.de, clemens.messerschmit@bihealth.de',
+    author_email=('manuel.holtgrewe@bihealth.de, '
+                  'clemens.messerschmit@bihealth.de'),
     url='https://github.com/bihealth/hlama',
     packages=find_packages(),
     entry_points={
