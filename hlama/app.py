@@ -337,9 +337,9 @@ def main(argv=None):
                         default=True, action='store_false',
                         help='Disable input checks')
 
-    parser.add_argument('--num-threads', default=8,
+    parser.add_argument('--num-threads', default=1,
                         help=('Number of threads to use for read mapping, '
-                              ' defaults to 8'))
+                              ' defaults to 1'))
 
     args = parser.parse_args(argv)
     return run(args)
