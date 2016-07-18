@@ -37,7 +37,7 @@ class Configuration:
         if self.dep_source == 'bioconda':
             prepend = self.config.get('hlama.bioconda', 'prepend_path')
             if prepend:
-                prepend = 'export PATH={prepend}:$PATH; '.format(
+                prepend = 'export PATH={prepend}:$PATH\n'.format(
                     prepend=prepend)
             env = self.config.get('hlama.bioconda', 'env')
             if env:

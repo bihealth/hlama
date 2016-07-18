@@ -43,20 +43,17 @@ def test_app(tmpdir, report, tsv_file, data_dir):
 
     assert set(result) == set(solution)
 
-    with open(os.path.join(os.path.dirname(__file__), work_dir,
-                           'daughter1.d/hla_types.txt')) as f:
+    with open(os.path.join(work_dir, 'daughter1.d/hla_types.txt')) as f:
         result = f.read().splitlines()
         assert result == ['A*01:01', 'A*02:01', 'B*07:02', 'B*08:01',
                           'C*01:06', 'C*02:02']
 
-    with open(os.path.join(os.path.dirname(__file__), work_dir,
-                           'father1.d/hla_types.txt')) as f:
+    with open(os.path.join(work_dir, 'father1.d/hla_types.txt')) as f:
         result = f.read().splitlines()
         assert result == ['A*01:03', 'A*02:01', 'B*07:02', 'B*07:05',
                           'C*01:06', 'C*02:02']
 
-    with open(os.path.join(os.path.dirname(__file__), work_dir,
-                           'mother1.d/hla_types.txt')) as f:
+    with open(os.path.join(work_dir, 'mother1.d/hla_types.txt')) as f:
         result = f.read().splitlines()
         assert result == ['A*01:01', 'A*68:02', 'B*08:01', 'B*08:01',
                           'C*01:06', 'C*12:16']

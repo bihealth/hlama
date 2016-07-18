@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bihealth/hlama.svg?branch=master)](https://travis-ci.org/bihealth/hlama)
+
 # HLA-MA
 
 <img align="right" width="171" height="200" src="images/alpaca.png">
@@ -70,7 +72,7 @@ dep_source = bioconda
 # further configuration of the Bioconda setup.
 [hlama.bioconda]
 # Optional, value to prepend to $PATH for activating conda installation
-prepend_path = ~/bioconda2/bin
+prepend_path = ~/miniconda2/bin
 # Name of the Conda environment to use.
 env = hlama-0.1
 

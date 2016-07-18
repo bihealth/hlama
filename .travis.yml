@@ -1,0 +1,12 @@
+# We need a modern Python for a mondern Snakemake
+language: python
+
+python:
+  - '3.4'
+  - '3.5'
+
+# Install dependencies
+before_install: .travis.d/travis-setup.sh
+
+# Run tests using py.test
+script: 'py.test'
