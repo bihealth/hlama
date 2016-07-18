@@ -73,7 +73,7 @@ def check_consistency(precision, normal_calls, tumor_calls):
     def to_str(hla):
         return hla.prec_str(precision)
 
-    ref = Counter(normal_calls)
-    sample = Counter(tumor_calls)
+    ref = Counter(map(to_str, normal_calls))
+    sample = Counter(map(to_str, tumor_calls))
     mismatches = len(list((ref - sample).elements()))
     return mismatches

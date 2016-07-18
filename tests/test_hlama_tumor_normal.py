@@ -30,7 +30,7 @@ def data_dir():
 
 
 def test_app(tmpdir, report, tsv_file, data_dir):
-    work_dir = tmpdir.mkdir('hlama_tumor_normal')
+    work_dir = str(tmpdir.mkdir('hlama_tumor_normal'))
     args = ['--tumor-normal', tsv_file, '--reads-base-dir', data_dir,
             '--work-dir', work_dir]
     app.main(args)
