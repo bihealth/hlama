@@ -21,7 +21,7 @@ setup(
         ],
     },
     install_requires=[
-        'snakemake>=3.7.1',
+        'snakemake==3.7.1',
     ],
     package_data={
         '': ['Snakefile', '*.ini', '*.fasta.gz'],
