@@ -1,3 +1,4 @@
+[![Install with Bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io)
 [![Build Status](https://travis-ci.org/bihealth/hlama.svg?branch=master)](https://travis-ci.org/bihealth/hlama)
 
 # HLA-MA
