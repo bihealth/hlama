@@ -93,14 +93,14 @@ EOF
 
 ### Checking matched tumor/normal samples
 
-The input is a TSV file (actually whitespaces are also recognized as delimiters) listing the donor/patient name, the sample name, a classification of the sample into normal or tumor (N or T), and a comma-separated list of FASTQ files.
+The input is a TSV file (actually whitespaces are also recognized as delimiters) listing the donor/patient name, the sample name, the corresponding reference sample (e.g. the germline sample), the sequence type, and a comma-separated list of FASTQ files.
 Files ending in `_1.fq.gz` and `_2.fq.gz` are recognized as first and second reads of a paired-end read run, as are files containing `_R1_` and `_R2_`.
 
 ```
 # cat <<"EOF" >matched.tsv
-donor sample-N  N normal_1.fq.gz,normal_2.fq.gz
-donor sample-T1 T tumor_1.fq.gz,tumor_1.fq.gz
-donor sample-T2 T metastasis_1.fq.gz,metastasis_2.fq.gz
+donor sample-N  sample-N DNA normal_1.fq.gz,normal_2.fq.gz
+donor sample-T1 sample-N DNA tumor_1.fq.gz,tumor_1.fq.gz
+donor sample-T2 sample-N RNA metastasis_1.fq.gz,metastasis_2.fq.gz
 EOF
 
 # hlama --help
