@@ -342,6 +342,11 @@ def main(argv=None):
                               ' defaults to 1'))
 
     args = parser.parse_args(argv)
+
+    # Make paths absolute
+    args.reads_base_dir = os.path.abspath(args.reads_base_dir)
+    args.work_dir = os.path.abspath(args.work_dir)
+
     return run(args)
 
 
