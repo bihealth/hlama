@@ -101,7 +101,7 @@ rule call_hla:
         map()
         {{
             yara_mapper -t {params.yara_threads} -e 4 {input[0]} $1 \
-            | samtools view -Sb -F 4 \
+            | samtools view -Sb -F 4 /dev/stdin \
             | samtools bam2fq - \
             >> $2
         }}
