@@ -14,6 +14,7 @@ Given a list of matches tumor/normal samples or a list of pedigree files with sa
 
 Note that OptiType is a Python 2 program while HLA-MA is a Python 3 program.
 We recommend installing the dependencies OptiType, Yara, and RazerS3 using Bioconda.
+Futher, you can now also install HLA-MA into the same conda environment.
 You can skip this step if you have already installed the prerequisites and placed them in your `$PATH`.
 
 The following commands will install Miniconda2 (for Python 2) in `~/miniconda2`.
@@ -31,13 +32,18 @@ Activate Miniconda 2 installation by adding `bin` path, then add R and Bioconda 
 # conda config --add channels bioconda
 ```
 
-The following commands will create the appropriate conda environment for HLA-MA v0.1:
+The following commands will create the appropriate conda environment for HLA-MA:
 
 ```
-# conda create -y -n hlama-0.1 yara=0.9.6 razers3=3.5.0 optitype=2015.10.20
+# conda create -y -n hlama python=3.4
+# conda install optitype=2015.10.20
+# conda install hlama yara=0.9.6 razers3=3.5.0
 ```
 
-### Installing HLA-MA
+Note that you have to install OptiType separately first because of a Python 2.7 dependency at time of writing.
+(OptiType now also works with Python3)
+
+### Installing HLA-MA without conda
 
 The following assumes that you are using virtualenv for your Python 3 environment.
 
@@ -56,7 +62,7 @@ Now you have a working `hlama` installation in your `$PATH`.
 ```
 
 Create a configuration file with dependencies installed in Bioconda.
-If you have your dependencies installed in your $PATH then you can skip this step.
+If you have your dependencies installed in your $PATH or if you are using conda you can skip this step.
 
 ```
 cat <<"EOF" >~/.hlama.cfg
@@ -126,6 +132,9 @@ EOF
 
 # hlama --pedigree pedigree.ped --read-base-dir path/to/reads
 ```
+
+## First Steps
+To test your HLA-MA installation and run a small example, please see [First steps](TUTORIAL.md)
 
 ## How does it work?
 

@@ -2,6 +2,9 @@
 
 ## develop
 
+## v0.3.1
+* bug fix release
+
 ## v0.3
 
 * translating parameter paths to absolute ones
